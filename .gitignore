@@ -38,4 +38,4 @@ next-env.d.ts
 /uploads
 
 # Prisma
-/prisma/migrations
+# /prisma/migrations - migrations should be committed for production

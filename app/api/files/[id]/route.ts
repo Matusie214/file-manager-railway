@@ -26,7 +26,7 @@ export async function GET(
 
     const fileBuffer = await readFile(file.storagePath)
 
-    return new NextResponse(fileBuffer.buffer, {
+    return new NextResponse(new Uint8Array(fileBuffer), {
       headers: {
         'Content-Type': file.mimeType,
         'Content-Disposition': `attachment; filename="${file.originalName}"`,

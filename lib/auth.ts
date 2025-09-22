@@ -1,8 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { NextRequest } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { prisma } from './prisma'
 
 export interface AuthUser {
   userId: string
@@ -11,6 +9,11 @@ export interface AuthUser {
 
 export async function verifyAuth(request: NextRequest): Promise<AuthUser | null> {
   try {
+    if (!prisma) {
+      console.warn('Database not available for auth verification')
+      return null
+    }
+
     const token = request.cookies.get('token')?.value
 
     if (!token) {

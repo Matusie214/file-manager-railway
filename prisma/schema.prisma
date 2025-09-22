@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  folders Folder[]
+  files   File[]
+  zipJobs ZipJob[]
+
+  @@map("users")
+}
+
+model Folder {
+  id       String  @id @default(cuid())
+  name     String
+  path     String  // Materialized path pattern
+  parentId String? @map("parent_id")
+  userId   String  @map("user_id")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent   Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children Folder[] @relation("FolderHierarchy")
+  files    File[]
+
+  // Constraints
+  @@unique([userId, parentId, name])
+  @@index([userId])
+  @@index([path])
+  @@index([parentId])
+  @@map("folders")
+}
+
+model File {
+  id          String @id @default(cuid())
+  name        String
+  originalName String @map("original_name")
+  size        BigInt
+  mimeType    String @map("mime_type")
+  checksum    String
+  storagePath String @map("storage_path")
+  
+  folderId String? @map("folder_id")
+  userId   String  @map("user_id")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, checksum])
+  @@index([userId])
+  @@index([folderId])
+  @@index([checksum])
+  @@index([userId, createdAt])
+  @@map("files")
+}
+
+model ZipJob {
+  id       String    @id @default(cuid())
+  userId   String    @map("user_id")
+  fileIds  String[]  @map("file_ids")
+  status   ZipStatus @default(PENDING)
+  filePath String?   @map("file_path")
+  error    String?
+
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("zip_jobs")
+}
+
+enum ZipStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}

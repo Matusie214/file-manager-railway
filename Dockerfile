@@ -37,9 +37,11 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy built application
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Copy public directory if it exists
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Copy Prisma client
 COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client

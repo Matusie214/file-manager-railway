@@ -5,7 +5,7 @@ builder = "dockerfile"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
-startCommand = "echo 'Starting migration...' && npx prisma migrate deploy && echo 'Migration completed, starting server...' && node server.js"
+# startCommand handled by Dockerfile CMD now
 
 [[services]]
 name = "web"

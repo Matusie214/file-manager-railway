@@ -14,7 +14,12 @@ const registerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Register endpoint called')
+    console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET)
+    console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL)
+    
     const body = await request.json()
+    console.log('Request body parsed')
     const { email, password, name } = registerSchema.parse(body)
 
     const existingUser = await prisma.user.findUnique({
@@ -61,15 +66,20 @@ export async function POST(request: NextRequest) {
 
     return response
   } catch (error) {
+    console.error('Register error:', error)
+    
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid input data' },
+        { error: 'Invalid input data', details: error.errors },
         { status: 400 }
       )
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }

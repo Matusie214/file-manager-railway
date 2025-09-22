@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File already exists' }, { status: 409 })
     }
 
-    const uploadsDir = join(process.cwd(), 'uploads', auth.userId)
+    const uploadsDir = join('/app/uploads', auth.userId)
     await mkdir(uploadsDir, { recursive: true })
 
     const fileExtension = file.name.split('.').pop() || ''

@@ -7,7 +7,7 @@ const prisma = new PrismaClient()
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await verifyAuth(request)
   if (!auth) {
@@ -15,8 +15,9 @@ export async function GET(
   }
 
   try {
+    const { id } = await params
     const file = await prisma.file.findFirst({
-      where: { id: params.id, userId: auth.userId }
+      where: { id, userId: auth.userId }
     })
 
     if (!file) {
@@ -40,7 +41,7 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await verifyAuth(request)
   if (!auth) {
@@ -48,8 +49,9 @@ export async function DELETE(
   }
 
   try {
+    const { id } = await params
     const file = await prisma.file.findFirst({
-      where: { id: params.id, userId: auth.userId }
+      where: { id, userId: auth.userId }
     })
 
     if (!file) {

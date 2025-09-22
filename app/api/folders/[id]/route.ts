@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await verifyAuth(request)
   if (!auth) {
@@ -14,8 +14,9 @@ export async function DELETE(
   }
 
   try {
+    const { id } = await params
     const folder = await prisma.folder.findFirst({
-      where: { id: params.id, userId: auth.userId }
+      where: { id, userId: auth.userId }
     })
 
     if (!folder) {

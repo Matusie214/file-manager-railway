@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { PrismaClient } from '@prisma/client'
 import { verifyAuth, unauthorizedResponse } from '@/lib/auth'
 import { buildFolderPath } from '@/lib/utils'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/prisma'
 
 const createFolderSchema = z.object({
   name: z.string().min(1).max(255),
@@ -51,8 +49,23 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    console.log('Create folder endpoint called')
+    console.log('Prisma client available:', !!prisma)
+    
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    }
+
     const body = await request.json()
-    const { name, parentId } = createFolderSchema.parse(body)
+    console.log('Request body:', body)
+    
+    const validation = createFolderSchema.safeParse(body)
+    if (!validation.success) {
+      console.log('Validation errors:', validation.error.errors)
+      return NextResponse.json({ error: 'Invalid input data', details: validation.error.errors }, { status: 400 })
+    }
+    
+    const { name, parentId } = validation.data
 
     let parentFolder = null
     if (parentId) {

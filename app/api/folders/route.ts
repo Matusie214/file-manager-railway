@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma'
 
 const createFolderSchema = z.object({
   name: z.string().min(1).max(255),
-  parentId: z.string().nullable().optional()
+  parentId: z.string().optional().nullable()
 })
 
 export async function GET(request: NextRequest) {

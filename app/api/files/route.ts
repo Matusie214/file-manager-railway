@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import { verifyAuth, unauthorizedResponse } from '@/lib/auth'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   const auth = await verifyAuth(request)
   if (!auth) {
     return unauthorizedResponse()
+  }
+
+  if (!prisma) {
+    return NextResponse.json({ error: 'Database not available' }, { status: 503 })
   }
 
   try {
